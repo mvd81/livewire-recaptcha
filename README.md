@@ -130,3 +130,30 @@ response has been successful, your actual Livewire component method will be exec
 
 When an error occurs with the Captcha validation, a ValidationException is thrown for the key `gRecaptchaResponse`.
 There is a translatable error message available under `'livewire-recaptcha::recaptcha.invalid_response'`.
+
+#### Testing
+
+When running automated tests, you don't want to actually call the captcha service.
+We can fake this using Laravel's `Http::fake` functionality.
+
+Below is an example of a successful Captcha check.
+
+```php
+
+test('we can submit a form', function () {
+
+    Http::fake([
+        'https://www.google.com/recaptcha/api/siteverify' => Http::response([
+            'success' => true,
+            'score' => 1
+        ]),
+    ]);
+
+    Livewire::test(TestForm::class)
+        ->set('name', 'John Do')
+        ->set('gRecaptchaResponse', 'test123')
+        ->call('submit')
+        ->assertHasNoErrors();    
+});
+
+```
